@@ -1,3 +1,4 @@
+const path = require("path");
 const dns = require("dns");
 
 dns.setDefaultResultOrder("ipv4first");
@@ -21,6 +22,7 @@ const corsOptions = {
     origin: process.env.CORS_ORIGIN || '*',
     optionsSuccessStatus: 200
 };
+app.use(express.static(__dirname));
 app.use(cors(corsOptions));
 app.use(express.json());
 
@@ -524,7 +526,7 @@ app.get("/api/daily-reports", async (req, res) => {
 =========================== */
 
 app.get("/", (req, res) => {
-    res.send("Friendz Shop API Running");
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
 /* ===========================
