@@ -4048,22 +4048,33 @@
                 it.sales?.forEach(s => {
                     if (s.date === today) {
                         dailyRevenue += s.amount;
-                        productsSold += 1;
-                        totalOrders += 1;
+                        productsSold++;
+                        totalOrders++;
                     }
                 });
             });
 
-            const todayPayments = allPayments.filter(p => new Date(p.date).toISOString().split("T")[0] === today);
-            const paymentSummary = { APS: 0, CASH: 0, GPAY: 0 };
+            const todayPayments = allPayments.filter(
+                p => new Date(p.date).toISOString().split("T")[0] === today
+            );
+
+            const paymentSummary = {
+                APS: 0,
+                CASH: 0,
+                GPAY: 0
+            };
+
             todayPayments.forEach(p => {
-                if (paymentSummary.hasOwnProperty(p.type)) paymentSummary[p.type] += p.amount;
+                if (paymentSummary.hasOwnProperty(p.type)) {
+                    paymentSummary[p.type] += p.amount;
+                }
             });
 
             const ok = await confirm(
-                `📊 Today's Earnings: ₹${dailyRevenue.toLocaleString('en-IN')}\n📦 Products Sold: ${productsSold}\n\nSend report and close the shop?`,
+                `📊 Today's Earnings: ₹${dailyRevenue.toLocaleString("en-IN")}\n📦 Products Sold: ${productsSold}\n\nSend report and close the shop?`,
                 "Close Shop"
             );
+
             if (!ok) return;
 
             try {
@@ -4071,20 +4082,25 @@
                     shop_name: "glory",
                     date: today,
                     totalRevenue: dailyRevenue,
-                    productsSold: productsSold,
-                    totalOrders: totalOrders,
+                    productsSold,
+                    totalOrders,
                     payments: paymentSummary,
-                    details: { products: items.length }
+                    details: {
+                        products: items.length
+                    }
                 };
 
-                await closeShopReport(reportData);
-
-                await showCloseShopSummary(reportData);
-
-                window.location.href = "index.html";
-
-            } catch (err) {
-                await alert("⚠️ Error closing shop: " + err.message, "Error");
+                try {
+                    await closeShopReport(reportData);
+                    await showCloseShopSummary(reportData);
+                } catch (err) {
+                    await alert("⚠️ " + err.message, "Error");
+                }
+            } finally {
+                // Defer redirect to ensure modal close completes
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 0);
             }
         }
 
